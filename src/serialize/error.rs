@@ -63,7 +63,7 @@ impl core::fmt::Display for SerializeError {
             }
             SerializeError::UnsupportedType(ptr) => {
                 let name =
-                    unsafe { CStr::from_ptr((*ob_type!(ptr.as_ptr())).tp_name).to_string_lossy() };
+                    unsafe { CStr::from_ptr(type_name_ptr!(ob_type!(ptr.as_ptr()))).to_string_lossy() };
                 write!(f, "Type is not JSON serializable: {name}")
             }
         }

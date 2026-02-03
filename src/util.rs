@@ -29,14 +29,21 @@ macro_rules! is_class_by_type {
     };
 }
 
-#[cfg(not(Py_GIL_DISABLED))]
+#[cfg(Py_3_15)]
+macro_rules! tp_flags {
+    ($ob_type:expr) => {
+        unsafe { crate::ffi::PyType_GetFlags($ob_type) }
+    };
+}
+
+#[cfg(all(not(Py_3_15), not(Py_GIL_DISABLED)))]
 macro_rules! tp_flags {
     ($ob_type:expr) => {
         unsafe { (*$ob_type).tp_flags }
     };
 }
 
-#[cfg(Py_GIL_DISABLED)]
+#[cfg(all(not(Py_3_15), Py_GIL_DISABLED))]
 macro_rules! tp_flags {
     ($ob_type:expr) => {
         unsafe {
@@ -53,6 +60,14 @@ macro_rules! is_subclass_by_flag {
     };
 }
 
+#[cfg(Py_3_15)]
+macro_rules! is_subclass_by_type {
+    ($ob_type:expr, $type:ident) => {
+        unsafe { crate::ffi::Py_TYPE($ob_type.cast::<crate::ffi::PyObject>()) == $type }
+    };
+}
+
+#[cfg(not(Py_3_15))]
 macro_rules! is_subclass_by_type {
     ($ob_type:expr, $type:ident) => {
         unsafe {
@@ -62,6 +77,20 @@ macro_rules! is_subclass_by_type {
                 .ob_type
                 == $type
         }
+    };
+}
+
+#[cfg(Py_3_15)]
+macro_rules! type_name_ptr {
+    ($ob_type:expr) => {
+        unsafe { crate::ffi::PyType_GetName($ob_type) }
+    };
+}
+
+#[cfg(not(Py_3_15))]
+macro_rules! type_name_ptr {
+    ($ob_type:expr) => {
+        unsafe { (*$ob_type).tp_name }
     };
 }
 

@@ -125,7 +125,7 @@ def default_systemerror(obj):
 
 
 def default_importerror(obj):
-    import doesnotexist  # noqa: PLC0415
+    import doesnotexist
 
     assert doesnotexist
 
