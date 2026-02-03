@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright ijl (2020-2026)
 
-use core::ffi::c_char;
+use core::ffi::{c_char, c_void};
 
 use crate::ffi::{
     Py_DECREF, Py_INCREF, Py_TPFLAGS_DEFAULT, PyErr_SetObject, PyExc_TypeError, PyObject,
@@ -114,6 +114,7 @@ pub(crate) unsafe extern "C" fn orjson_fragment_dealloc(object: *mut PyObject) {
 #[unsafe(no_mangle)]
 #[cold]
 #[cfg_attr(feature = "optimize", optimize(size))]
+#[cfg(not(Py_3_15))]
 pub(crate) unsafe extern "C" fn orjson_fragmenttype_new() -> *mut PyTypeObject {
     unsafe {
         #[cfg(Py_GIL_DISABLED)]
@@ -208,3 +209,40 @@ pub(crate) unsafe extern "C" fn orjson_fragmenttype_new() -> *mut PyTypeObject {
         ob_ptr
     }
 }
+
+#[unsafe(no_mangle)]
+#[cold]
+#[cfg_attr(feature = "optimize", optimize(size))]
+#[cfg(Py_3_15)]
+pub(crate) unsafe extern "C" fn orjson_fragmenttype_new() -> *mut PyTypeObject {
+    use pyo3_ffi::{PyType_FromSpec, PyType_Slot, PyType_Spec, Py_tp_dealloc, Py_tp_new};
+
+    unsafe {
+        static mut SLOTS: [PyType_Slot; 3] = [
+            PyType_Slot {
+                slot: Py_tp_dealloc,
+                pfunc: orjson_fragment_dealloc as *mut c_void,
+            },
+            PyType_Slot {
+                slot: Py_tp_new,
+                pfunc: orjson_fragment_tp_new as *mut c_void,
+            },
+            PyType_Slot {
+                slot: 0,
+                pfunc: core::ptr::null_mut(),
+            },
+        ];
+
+        let mut spec = PyType_Spec {
+            name: c"orjson.Fragment".as_ptr(),
+            basicsize: core::mem::size_of::<Fragment>() as _,
+            itemsize: 0,
+            flags: (Py_TPFLAGS_DEFAULT | pyo3_ffi::Py_TPFLAGS_IMMUTABLETYPE) as _,
+            slots: SLOTS.as_mut_ptr(),
+        };
+
+        let ty_obj = PyType_FromSpec(&mut spec);
+        ty_obj.cast::<PyTypeObject>()
+    }
+}
+
