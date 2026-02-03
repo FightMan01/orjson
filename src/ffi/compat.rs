@@ -20,6 +20,24 @@ pub(crate) const _Py_IMMORTAL_REFCNT: pyo3_ffi::Py_ssize_t = {
         (core::ffi::c_uint::MAX >> 2) as pyo3_ffi::Py_ssize_t
     }
 };
+
+#[cfg(Py_3_15)]
+#[repr(C)]
+pub(crate) struct PyDateTime_CAPI {
+    pub DateType: *mut pyo3_ffi::PyTypeObject,
+    pub DateTimeType: *mut pyo3_ffi::PyTypeObject,
+    pub TimeType: *mut pyo3_ffi::PyTypeObject,
+    pub DeltaType: *mut pyo3_ffi::PyTypeObject,
+    pub TZInfoType: *mut pyo3_ffi::PyTypeObject,
+}
+
+#[cfg(Py_3_15)]
+#[inline(always)]
+#[allow(non_snake_case)]
+pub(crate) unsafe fn PyVectorcall_NARGS(nargsf: usize) -> pyo3_ffi::Py_ssize_t {
+    let offset = 1usize << (core::mem::size_of::<usize>() * 8 - 1);
+    (nargsf & !offset) as pyo3_ffi::Py_ssize_t
+}
 #[cfg(all(Py_3_12, not(Py_GIL_DISABLED)))]
 #[inline(always)]
 #[allow(non_snake_case)]

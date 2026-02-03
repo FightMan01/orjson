@@ -59,7 +59,7 @@ pub(crate) use pyo3_ffi::{
     Py_True, Py_XDECREF, Py_buffer, Py_hash_t, Py_intptr_t, Py_mod_exec, Py_ssize_t, PyASCIIObject,
     PyBool_Type, PyBuffer_IsContiguous, PyByteArray_AsString, PyByteArray_Size, PyByteArray_Type,
     PyBytes_FromStringAndSize, PyBytes_Type, PyCFunction_NewEx, PyCapsule_Import,
-    PyCompactUnicodeObject, PyDateTime_CAPI, PyDateTime_DATE_GET_HOUR,
+    PyCompactUnicodeObject, PyDateTime_DATE_GET_HOUR,
     PyDateTime_DATE_GET_MICROSECOND, PyDateTime_DATE_GET_MINUTE, PyDateTime_DATE_GET_SECOND,
     PyDateTime_DATE_GET_TZINFO, PyDateTime_DELTA_GET_DAYS, PyDateTime_DELTA_GET_SECONDS,
     PyDateTime_DateTime, PyDateTime_GET_DAY, PyDateTime_GET_MONTH, PyDateTime_GET_YEAR,
@@ -77,8 +77,12 @@ pub(crate) use pyo3_ffi::{
     PyObject_GetAttr, PyObject_HasAttr, PyObject_Hash, PyObject_Vectorcall, PyTuple_New,
     PyTuple_Type, PyTupleObject, PyType_GetFlags, PyType_GetName, PyType_Ready, PyType_Type,
     PyTypeObject, PyUnicode_AsUTF8AndSize, PyUnicode_FromStringAndSize,
-    PyUnicode_InternFromString, PyUnicode_New, PyUnicode_Type, PyVarObject, PyVectorcall_NARGS,
+    PyUnicode_InternFromString, PyUnicode_New, PyUnicode_Type, PyVarObject,
 };
+
+#[cfg(not(Py_3_15))]
+#[allow(unused_imports)]
+pub(crate) use pyo3_ffi::{PyDateTime_CAPI, PyVectorcall_NARGS};
 
 #[allow(unused_imports, deprecated)]
 pub(crate) use pyo3_ffi::PyErr_Restore;

@@ -2,9 +2,20 @@
 // Copyright ijl (2022-2026)
 
 use crate::ffi::{Py_ssize_t, PyObject};
+#[cfg(Py_3_15)]
+use crate::ffi::{PyVarObject, Py_hash_t};
 use core::ffi::c_char;
 
+#[cfg(not(Py_3_15))]
 pub(crate) use pyo3_ffi::PyBytesObject;
+
+#[cfg(Py_3_15)]
+#[repr(C)]
+pub(crate) struct PyBytesObject {
+    pub ob_base: PyVarObject,
+    pub ob_shash: Py_hash_t,
+    pub ob_sval: [c_char; 1],
+}
 
 #[cfg(CPython)]
 #[allow(non_snake_case)]
